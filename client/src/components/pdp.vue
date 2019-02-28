@@ -8,7 +8,7 @@
         <div
           class="imagePDP col-12 col-md-6 justify-content-center align-content-center pt-3 pt-md-5 pb-3 pb-md-5 h-auto position-relative">
           <h2 class="titleImage text-center text-uppercase">black peper</h2>
-          <img src="../assets/blackpeper.jpg" class="p-2 imgPDP" id="imgPDP"/>
+          <img src="../assets/ProductImage/blackpeper.jpg" class="p-2 imgPDP" id="imgPDP"/>
         </div>
         <div class="col-12 col-md-6 pt-5">
           <h2 class="titleTable text-center text-uppercase">SPECIFICATIONS</h2>

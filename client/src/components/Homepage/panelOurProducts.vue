@@ -5,40 +5,28 @@
       <div class="slideShowProduct">
         <div class="carousel-wrap pb-2">
           <div class="owl-carousel owl-theme owl-product">
-            <div class="item text-center ">
-              <img class="position-relative" src="../../assets/black-chana.jpg" alt="">
-              <h3 class="position-absolute text-white h3CenterDiv">Black Chana</h3>
-            </div>
-            <div class="item">
-              <img class="position-relative" src="../../assets/cashew-kernels.jpg" alt="">
-              <h3 class="position-absolute text-white h3CenterDiv">Cashwe Kernels</h3>
-            </div>
-            <div class="item">
-              <img class="position-relative" src="../../assets/cassia.jpg" alt="">
-              <h3 class="position-absolute text-white h3CenterDiv">Cassia</h3>
-            </div>
-            <div class="item">
-              <img class="position-relative" src="../../assets/castor.jpg" alt="">
-              <h3 class="position-absolute text-white h3CenterDiv">Castor</h3>
+            <div v-for= "item1 in items" class="item text-center">
+              <img class="position-relative" :src="item1.image" alt="">
+              <h3 class="position-absolute text-white h3CenterDiv">{{item1.name}}</h3>
             </div>
           </div>
         </div>
         <div class="carousel-wrap pb-5 d-md-block d-none">
           <div class="owl-carousel owl-theme owl-product">
             <div class="item text-center">
-              <img class="position-relative" src="../../assets/cinamon.jpg" alt="">
+              <img class="position-relative" src="../../assets/ProductImage/cinamon.jpg" alt="">
               <h3 class="position-absolute text-white h3CenterDiv">Cinamon</h3>
             </div>
             <div class="item">
-              <img class="position-relative" src="../../assets/cocoa-powder.jpg" alt="">
+              <img class="position-relative" src="../../assets/ProductImage/cocoa-powder.jpg" alt="">
               <h3 class="position-absolute text-white h3CenterDiv">Cocoa Powder</h3>
             </div>
             <div class="item">
-              <img class="position-relative" src="../../assets/corn-starch.jpeg" alt="">
+              <img class="position-relative" src="../../assets/ProductImage/corn-starch.jpeg" alt="">
               <h3 class="position-absolute text-white h3CenterDiv">Corn Starch</h3>
             </div>
             <div class="item">
-              <img class="position-relative" src="../../assets/cotton-seed-oils.jpg" alt="">
+              <img class="position-relative" src="../../assets/ProductImage/cotton-seed-oils.jpg" alt="">
               <h3 class="position-absolute text-white h3CenterDiv">Cotton Seed Oils </h3>
             </div>
           </div>
@@ -58,7 +46,15 @@ export default {
   name: 'panelOurProducts',
   components: { HeaderComponent },
   data () {
-    return {}
+    return {
+      items: [{
+        name: 'Trai cay',
+        image: require('../../assets/ProductImage/cinamon.jpg')
+      }, {
+        name: 'Trai Caaaa',
+        image: require('../../assets/ProductImage/cinamon.jpg')
+      }]
+    }
   },
   mounted () {
     $('.owl-product').owlCarousel({

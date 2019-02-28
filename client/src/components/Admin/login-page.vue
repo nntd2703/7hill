@@ -52,11 +52,11 @@ export default {
         password: this.password
       })
       let message = responsive.data.message;
-      if(message) {
+      if(message == true) {
         this.message = ''
         router.push("index")
       } else {
-        this.message = "User name or password invalid"
+        this.message = message
       }
     }
   }

@@ -42,7 +42,7 @@
     <div class="slideProduct pr-5 pl-5">
       <div class="slider owl-carousel owl-theme owl-product">
         <div class="product">
-          <img src="../assets/black-chana.jpg"/>
+          <img src="../assets/ProductImage/black-chana.jpg"/>
           <p class="pt-2">Black Chana</p>
         </div>
         <div class="product">
