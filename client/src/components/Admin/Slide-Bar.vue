@@ -1,3 +1,4 @@
+<!--suppress ALL -->
 <template>
   <div class="wrapper">
     <!-- Sidebar Holder -->
@@ -72,68 +73,68 @@
           </tr>
           </thead>
           <tbody>
-          <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
-          </tr>
-          <tr>
-            <th scope="row">2</th>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>@fat</td>
-          </tr>
-          <tr>
-            <th scope="row">3</th>
-            <td>Larry</td>
-            <td>the Bird</td>
-            <td>@twitter</td>
+          <tr v-for="item in items" v-bind:key="item['.key']">
+            <th scope="row">{{item.key}}</th>
+            <td>{{item.name}}</td>
+            <td>{{item.key}}</td>
+            <td>{{item.name}}</td>
           </tr>
           </tbody>
         </table>
 
         <form class="col-md-3">
           <div class="form-group">
-            <label for="exampleInputEmail1">Quality</label>
-            <input type="email" class="form-control col-12" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+            <label for="exampleInputEmail1">Name</label>
+            <input type="text" class="form-control col-12" id="itemName" aria-describedby="emailHelp" placeholder="Enter email" v-model="newItem.name">
           </div>
           <div class="form-group">
-            <label for="exampleInputEmail1"></label>
-            <input type="email" class="form-control col-12" id="exampleInputEmail2" aria-describedby="emailHelp" placeholder="Enter email">
+            <label for="exampleInputEmail1">Key</label>
+            <input type="text" class="form-control col-12" id="itemKey" aria-describedby="emailHelp" placeholder="Enter email" v-model="newItem.key">
           </div>
           <div class="form-group">
             <label for="exampleInputEmail1">Email address</label>
             <input type="email" class="form-control col-12" id="exampleInputEmail3" aria-describedby="emailHelp" placeholder="Enter email">
           </div>
-          <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-      </div>
-      <div class="selectImage">
-        <div class="helper"></div>
-        <div class="drop display-inline align-center" @dragover.prevent @drop="onDrop">
-          <div class="helper"></div>
-          <label v-if="!image" class="btn display-inline">
-            SELECT OR DROP AN IMAGE
-            <input type="file" name="image" @change="onChange">
-          </label>
-          <div class="hidden display-inline align-center" v-else v-bind:class="{ 'image': true }">
-            <img :src="image" alt="" class="img" />
-            <br>
-            <br>
-            <button class="btn" @click="removeFile">REMOVE</button>
+          <div class="selectedImage">
+            <div class="helper"></div>
+            <div class="drop display-inline align-center" @dragover.prevent @drop="onDrop">
+              <div class="helper"></div>
+              <label v-if="!image" class="btn display-inline">
+                SELECT OR DROP AN IMAGE
+                <input type="file" name="image" @change="onChange">
+              </label>
+              <div class="hidden display-inline align-center" v-else v-bind:class="{ 'image': true }">
+                <img :src="image" alt="" class="img"/>
+                <br>
+                <br>
+                <button class="btn" @click="removeFile">REMOVE</button>
+              </div>
+            </div>
           </div>
-        </div>
+          <button type="submit" class="btn btn-primary btnCenter" value="add Item" @click="addItem()">Submit</button>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { firebase } from '@/services/firebaseConfig'
+
+let itemArr = firebase.database().ref('items')
 export default {
   name: 'Slide-Bar',
+  firebase: {
+    items: itemArr
+  },
   data () {
     return {
+      newItem: {
+        name: '',
+        key: '',
+        imageUrl: '',
+        image: null
+      },
       image: ''
     }
   },
@@ -146,6 +147,35 @@ export default {
     })
   },
   methods: {
+    addItem () {
+      let key
+      if(!this.image){
+        return
+      }
+      const item = {
+        name: this.name,
+        key: this.key,
+        image: this.image
+      }
+      console.log('newItem', item)
+      itemArr.push(item)
+        .then((data) => {
+          key = data.key
+          return key
+        })
+        .then((key) => {
+          const fileName = item.name
+          console.log('filename', fileName)
+          return firebase.storage().ref('items/' + fileName + '.jpg').put(item.image)
+        })
+        .then((fileData) => {
+          item.imageUrl = fileData.metadata.downloadUrls[0]
+          return firebase.database().ref('items').child(key).update({ imageUrl: item.imageUrl })
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    },
     onDrop: function (e) {
       e.stopPropagation()
       e.preventDefault()
@@ -154,6 +184,8 @@ export default {
     },
     onChange (e) {
       var files = e.target.files
+      var fileName = files[0].name
+      console.log(fileName)
       this.createFile(files[0])
     },
     createFile (file) {
@@ -161,15 +193,13 @@ export default {
         alert('Select an image')
         return
       }
-      var img = new Image()
+      // var img = new Image()
       var reader = new FileReader()
-      var vm = this
-
-      reader.onload = function (e) {
-        vm.image = e.target.result
+      reader.onload = (e) => {
+        this.image = e.target.result
+        this.imageUrl = reader.result
       }
       reader.readAsDataURL(file)
-      console.log(img)
     },
     removeFile () {
       this.image = ''
@@ -446,6 +476,11 @@ export default {
     max-height: 400px;
     max-width: 600px;
     width: 100%;
+  }
+
+  .btnCenter {
+    display: flex;
+    justify-content: space-between;
   }
 
 </style>
