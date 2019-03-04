@@ -5,29 +5,17 @@
       <div class="slideShowProduct">
         <div class="carousel-wrap pb-2">
           <div class="owl-carousel owl-theme owl-product">
-            <div v-for= "item1 in items" class="item text-center">
-              <img class="position-relative" :src="item1.image" alt="">
-              <h3 class="position-absolute text-white h3CenterDiv">{{item1.name}}</h3>
+            <div v-for="item in itemList1" class="item text-center" v-bind:key="item['.key']">
+              <img class="position-relative" :src="item.imageUrl" alt="">
+              <h3 class="position-absolute text-white h3CenterDiv">{{item.name}}</h3>
             </div>
           </div>
         </div>
         <div class="carousel-wrap pb-5 d-md-block d-none">
           <div class="owl-carousel owl-theme owl-product">
-            <div class="item text-center">
-              <img class="position-relative" src="../../assets/ProductImage/cinamon.jpg" alt="">
-              <h3 class="position-absolute text-white h3CenterDiv">Cinamon</h3>
-            </div>
-            <div class="item">
-              <img class="position-relative" src="../../assets/ProductImage/cocoa-powder.jpg" alt="">
-              <h3 class="position-absolute text-white h3CenterDiv">Cocoa Powder</h3>
-            </div>
-            <div class="item">
-              <img class="position-relative" src="../../assets/ProductImage/corn-starch.jpeg" alt="">
-              <h3 class="position-absolute text-white h3CenterDiv">Corn Starch</h3>
-            </div>
-            <div class="item">
-              <img class="position-relative" src="../../assets/ProductImage/cotton-seed-oils.jpg" alt="">
-              <h3 class="position-absolute text-white h3CenterDiv">Cotton Seed Oils </h3>
+            <div v-for="item in itemList2" class="item text-center" v-bind:key="item['.key']">
+              <img class="position-relative" :src="item.imageUrl" alt="">
+              <h3 class="position-absolute text-white h3CenterDiv">{{item.name}}</h3>
             </div>
           </div>
         </div>
@@ -41,22 +29,30 @@ import HeaderComponent from './headerComponent'
 import 'owl.carousel/dist/assets/owl.carousel.css'
 import 'owl.carousel/dist/assets/owl.theme.default.min.css'
 import 'owl.carousel'
+import { firebase } from '@/services/firebaseConfig'
+
+let itemArr = firebase.database().ref('items')
 
 export default {
   name: 'panelOurProducts',
   components: { HeaderComponent },
+  firebase: {
+    items: itemArr
+  },
   data () {
-    return {
-      items: [{
-        name: 'Trai cay',
-        image: require('../../assets/ProductImage/cinamon.jpg')
-      }, {
-        name: 'Trai Caaaa',
-        image: require('../../assets/ProductImage/cinamon.jpg')
-      }]
+    if (this.items < 6) {
+      return {
+        itemList1: this.items
+      }
+    } else {
+      return {
+        itemList1: this.items.slice(0, this.items / 2),
+        itemList2: this.items.slice(this.items / 2 + 1)
+      }
     }
   },
   mounted () {
+    console.log(itemArr)
     $('.owl-product').owlCarousel({
       margin: 50,
       navText: ['<div class=\'nav-btn prev-slide\'></div>', '<div class=\'nav-btn next-slide\'></div>'],

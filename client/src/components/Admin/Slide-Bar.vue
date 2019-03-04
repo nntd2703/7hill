@@ -66,18 +66,16 @@
         <table class="table table-striped col-md-8">
           <thead>
           <tr>
-            <th scope="col">#</th>
-            <th scope="col">First</th>
-            <th scope="col">Last</th>
-            <th scope="col">Handle</th>
+            <th scope="col">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Image</th>
           </tr>
           </thead>
           <tbody>
           <tr v-for="item in items" v-bind:key="item['.key']">
             <th scope="row">{{item.key}}</th>
             <td>{{item.name}}</td>
-            <td>{{item.key}}</td>
-            <td>{{item.name}}</td>
+            <td><img v-bind:src="item.imageUrl" alt="" class="img"/></td>
           </tr>
           </tbody>
         </table>
@@ -85,15 +83,7 @@
         <form class="col-md-3">
           <div class="form-group">
             <label for="exampleInputEmail1">Name</label>
-            <input type="text" class="form-control col-12" id="itemName" aria-describedby="emailHelp" placeholder="Enter email" v-model="newItem.name">
-          </div>
-          <div class="form-group">
-            <label for="exampleInputEmail1">Key</label>
-            <input type="text" class="form-control col-12" id="itemKey" aria-describedby="emailHelp" placeholder="Enter email" v-model="newItem.key">
-          </div>
-          <div class="form-group">
-            <label for="exampleInputEmail1">Email address</label>
-            <input type="email" class="form-control col-12" id="exampleInputEmail3" aria-describedby="emailHelp" placeholder="Enter email">
+            <input type="text" class="form-control col-12" id="itemName" aria-describedby="emailHelp" placeholder="Enter product name" v-model="newItem.name" >
           </div>
           <div class="selectedImage">
             <div class="helper"></div>
@@ -115,6 +105,7 @@
         </form>
       </div>
     </div>
+    <flash-message transitionIn="flash" class="flashpool"></flash-message>
   </div>
 </template>
 
@@ -136,7 +127,11 @@ export default {
         image: null,
         fileName: ''
       },
-      image: ''
+      image: '',
+      errorType: 'error',
+      warningType: 'warning',
+      infoType: 'info',
+      successType: 'success'
     }
   },
   mounted () {
@@ -147,37 +142,45 @@ export default {
       })
     })
   },
+  watch: {
+  },
   methods: {
     addItem () {
       let key
-      let imageUrl
-      if (!this.image) {
-        return
-      }
+      this.newItem.key = Math.random().toString(36).substring(7)
       const item = {
         name: this.newItem.name,
         key: this.newItem.key
       }
       console.log('newItem', item)
       // const file = this.image
-      itemArr.push(item)
-        .then(data => {
-          key = data.key
-          return key
+      if (item.name !== '' && item.name && this.newItem.image) {
+        itemArr.push(item)
+          .then(data => {
+            key = data.key
+            return key
+          })
+          .then(key => {
+            const fileName = this.newItem.fileName
+            const ext = fileName.slice(fileName.lastIndexOf('.'))
+            return firebase.storage().ref('items/' + key + '.' + ext).put(this.newItem.image)
+          })
+          .then(snapshot => {
+            snapshot.ref.getDownloadURL().then(function (downloadURL) {
+              return firebase.database().ref('items').child(key).update({ imageUrl: downloadURL })
+            })
+          })
+          .catch(error => {
+            console.log(error)
+            return error
+          })
+      } else {
+        console.log('NoImage')
+        this.flash('Please input again', this.errorType, {
+          timeout: 5000,
+          important: false
         })
-        .then(key => {
-          const fileName = this.newItem.fileName
-          const ext = fileName.slice(fileName.lastIndexOf('.'))
-          return firebase.storage().ref('items/' + key + '.' + ext).put(this.newItem.image)
-        })
-        .then(snapshot => {
-          snapshot.ref.getDownloadURL().then(function(downloadURL) {
-            return firebase.database().ref('items').child(key).update({ imageUrl: downloadURL })
-          });
-        })
-        .catch(error => {
-          console.log(error)
-        })
+      }
     },
     onDrop: function (e) {
       e.stopPropagation()
@@ -213,6 +216,30 @@ export default {
 <style scoped type="scss">
   @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
 
+  .flashpool {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-height: 400px;
+    width: 260px;
+    -webkit-perspective: 400px;
+    perspective: 400px;
+  }
+
+  .flashpool .flash__message {
+    width: 260px;
+    -webkit-transition: all 500ms;
+    -o-transition: all 500ms;
+    transition: all 500ms;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-family: 'Oxygen', sans-serif;
+    font-size: 13px;
+    line-height: 130%;
+  }
   body {
     font-family: 'Poppins', sans-serif;
     background: #fafafa;
@@ -395,11 +422,6 @@ export default {
     margin-left: 20px;
   }
 
-  * {
-    font-family: 'Arial';
-    font-size: 12px;
-  }
-
   *,
   *:after,
   *:before {
@@ -484,5 +506,15 @@ export default {
     display: flex;
     justify-content: space-between;
   }
+  @import url('https://fonts.googleapis.com/css?family=Raleway:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i');
 
+  html, body{
+    height:100%;
+    width:100%;
+    font-family: 'Raleway', sans-serif;
+    background-color:#efefef;
+    display: table;
+    text-align: center;
+
+  }
 </style>
