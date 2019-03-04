@@ -101,7 +101,7 @@
               <div class="helper"></div>
               <label v-if="!image" class="btn display-inline">
                 SELECT OR DROP AN IMAGE
-                <input type="file" name="image" @change="onChange">
+                <input type="file" name="image" @change="onChange" accept="image/*" >
               </label>
               <div class="hidden display-inline align-center" v-else v-bind:class="{ 'image': true }">
                 <img :src="image" alt="" class="img"/>
@@ -133,7 +133,8 @@ export default {
         name: '',
         key: '',
         imageUrl: '',
-        image: null
+        image: null,
+        fileName: ''
       },
       image: ''
     }
@@ -149,30 +150,32 @@ export default {
   methods: {
     addItem () {
       let key
-      if(!this.image){
+      let imageUrl
+      if (!this.image) {
         return
       }
       const item = {
-        name: this.name,
-        key: this.key,
-        image: this.image
+        name: this.newItem.name,
+        key: this.newItem.key
       }
       console.log('newItem', item)
+      // const file = this.image
       itemArr.push(item)
-        .then((data) => {
+        .then(data => {
           key = data.key
           return key
         })
-        .then((key) => {
-          const fileName = item.name
-          console.log('filename', fileName)
-          return firebase.storage().ref('items/' + fileName + '.jpg').put(item.image)
+        .then(key => {
+          const fileName = this.newItem.fileName
+          const ext = fileName.slice(fileName.lastIndexOf('.'))
+          return firebase.storage().ref('items/' + key + '.' + ext).put(this.newItem.image)
         })
-        .then((fileData) => {
-          item.imageUrl = fileData.metadata.downloadUrls[0]
-          return firebase.database().ref('items').child(key).update({ imageUrl: item.imageUrl })
+        .then(snapshot => {
+          snapshot.ref.getDownloadURL().then(function(downloadURL) {
+            return firebase.database().ref('items').child(key).update({ imageUrl: downloadURL })
+          });
         })
-        .catch((error) => {
+        .catch(error => {
           console.log(error)
         })
     },
@@ -182,10 +185,9 @@ export default {
       var files = e.dataTransfer.files
       this.createFile(files[0])
     },
-    onChange (e) {
+    async onChange (e) {
       var files = e.target.files
-      var fileName = files[0].name
-      console.log(fileName)
+      this.newItem.image = files[0]
       this.createFile(files[0])
     },
     createFile (file) {
