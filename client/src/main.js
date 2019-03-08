@@ -3,7 +3,9 @@ import App from './App.vue'
 import router from './router'
 import VueFire from 'vuefire'
 import VueFlashMessage from 'vue-flash-message'
+import SmartTable from 'vuejs-smart-table'
 
+Vue.use(SmartTable)
 Vue.use(VueFlashMessage)
 Vue.use(VueFire)
 Vue.config.productionTip = false

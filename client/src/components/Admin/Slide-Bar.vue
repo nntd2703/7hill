@@ -41,7 +41,6 @@
 
     <!-- Page Content Holder -->
     <div id="content" class="w-100">
-
       <nav class="navbar navbar-default">
         <div class="container-fluid">
 
@@ -62,159 +61,245 @@
           </div>
         </div>
       </nav>
-      <div class="row">
-        <table class="table table-striped col-md-8">
-          <thead>
-          <tr>
-            <th scope="col">ID</th>
-            <th scope="col">Name</th>
-            <th scope="col">Image</th>
-          </tr>
+
+      <div>
+        <label>Filter by Name:</label>
+        <input class="form-control" v-model="filters.name.value"/>
+        <v-table
+          :data="listItemProduct"
+          :filters="filters"
+          :hideSortIcons="true"
+          :currentPage.sync="currentPage"
+          :pageSize="5"
+          @totalPagesChanged="totalPages = $event" id="tableProduct">
+          <thead slot="head">
+          <th>Key</th>
+          <v-th sortKey="name" defaultSort="desc">Name</v-th>
+          <th>Image</th>
           </thead>
-          <tbody>
-          <tr v-for="item in items" v-bind:key="item['.key']">
-            <th scope="row">{{item.key}}</th>
-            <td>{{item.name}}</td>
-            <td><img v-bind:src="item.imageUrl" alt="" class="img"/></td>
+          <tbody slot="body" slot-scope="{displayData}">
+          <tr v-for="row in displayData" :key="row.id">
+            <td>{{ row.key }}</td>
+            <td>{{ row.name }}</td>
+            <td><img :src=row.imageUrl width="150" height="150"></td>
           </tr>
           </tbody>
-        </table>
-
-        <form class="col-md-3">
-          <div class="form-group">
-            <label for="exampleInputEmail1">Name</label>
-            <input type="text" class="form-control col-12" id="itemName" aria-describedby="emailHelp" placeholder="Enter product name" v-model="newItem.name" >
-          </div>
-          <div class="selectedImage">
+        </v-table>
+        <smart-pagination
+          :currentPage.sync="currentPage"
+          :totalPages="totalPages"
+          id="paginationNav"
+        />
+      </div>
+      <form>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Name</label>
+          <input type="text" class="form-control col-12" id="itemName" aria-describedby="emailHelp"
+                 placeholder="Enter product name" v-model="newItem.name">
+        </div>
+        <div class="selectedImage">
+          <div class="helper"></div>
+          <div class="drop display-inline align-center" @dragover.prevent @drop="onDrop">
             <div class="helper"></div>
-            <div class="drop display-inline align-center" @dragover.prevent @drop="onDrop">
-              <div class="helper"></div>
-              <label v-if="!image" class="btn display-inline">
-                SELECT OR DROP AN IMAGE
-                <input type="file" name="image" @change="onChange" accept="image/*" >
-              </label>
-              <div class="hidden display-inline align-center" v-else v-bind:class="{ 'image': true }">
-                <img :src="image" alt="" class="img"/>
-                <br>
-                <br>
-                <button class="btn" @click="removeFile">REMOVE</button>
-              </div>
+            <label v-if="!image" class="btn display-inline">
+              SELECT OR DROP AN IMAGE
+              <input type="file" name="image" @change="onChange" accept="image/*">
+            </label>
+            <div class="hidden display-inline align-center" v-else v-bind:class="{ 'image': true }">
+              <img :src="image" alt="" class="img" id="productImage" height="300" width="300"/>
+              <br>
+              <br>
+              <button class="btn" @click="removeFile">REMOVE</button>
             </div>
           </div>
-          <button type="submit" class="btn btn-primary btnCenter" value="add Item" @click="addItem()">Submit</button>
-        </form>
-      </div>
+        </div>
+        <button type="button" class="btn btn-primary btnCenter" value="add Item" @click="addItem()">Submit</button>
+      </form>
     </div>
     <flash-message transitionIn="flash" class="flashpool"></flash-message>
   </div>
 </template>
 
 <script>
-import { firebase } from '@/services/firebaseConfig'
+  import {firebase} from '@/services/firebaseConfig'
 
-let itemArr = firebase.database().ref('items')
-export default {
-  name: 'Slide-Bar',
-  firebase: {
-    items: itemArr
-  },
-  data () {
-    return {
-      newItem: {
-        name: '',
-        key: '',
-        imageUrl: '',
-        image: null,
-        fileName: ''
-      },
-      image: '',
-      errorType: 'error',
-      warningType: 'warning',
-      infoType: 'info',
-      successType: 'success'
-    }
-  },
-  mounted () {
-    $(document).ready(function () {
-      $('#sidebarCollapse').on('click', function () {
-        $('#sidebar').toggleClass('active')
-        $(this).toggleClass('active')
-      })
-    })
-  },
-  watch: {
-  },
-  methods: {
-    addItem () {
-      let key
-      this.newItem.key = Math.random().toString(36).substring(7)
-      const item = {
-        name: this.newItem.name,
-        key: this.newItem.key
+  let itemArr = firebase.database().ref('items')
+  let listItemProduct
+  export default {
+    name: 'Slide-Bar',
+    firebase: {
+      listItemProduct: itemArr
+    },
+    data() {
+      return {
+        currentPage: 1,
+        totalPages: 0,
+        filters: {
+          name: { value: '', keys: ['name'] }
+        },
+        newItem: {
+          name: '',
+          key: '',
+          imageUrl: '',
+          image: null,
+          fileName: ''
+        },
+        image: '',
+        errorType: 'error',
+        warningType: 'warning',
+        infoType: 'info',
+        successType: 'success',
+        listItemProduct: ''
       }
-      console.log('newItem', item)
-      // const file = this.image
-      if (item.name !== '' && item.name && this.newItem.image) {
-        itemArr.push(item)
-          .then(data => {
-            key = data.key
-            return key
-          })
-          .then(key => {
-            const fileName = this.newItem.fileName
-            const ext = fileName.slice(fileName.lastIndexOf('.'))
-            return firebase.storage().ref('items/' + key + '.' + ext).put(this.newItem.image)
-          })
-          .then(snapshot => {
-            snapshot.ref.getDownloadURL().then(function (downloadURL) {
-              return firebase.database().ref('items').child(key).update({ imageUrl: downloadURL })
-            })
-          })
-          .catch(error => {
-            console.log(error)
-            return error
-          })
-      } else {
-        console.log('NoImage')
-        this.flash('Please input again', this.errorType, {
-          timeout: 5000,
-          important: false
+    },
+    mounted() {
+      $(document).ready(function () {
+        $('#sidebarCollapse').on('click', function () {
+          $('#sidebar').toggleClass('active')
+          $(this).toggleClass('active')
         })
+      })
+    },
+    methods: {
+      addItem() {
+        let key
+        this.newItem.key = Math.random().toString(36).substring(7)
+        const item = {
+          name: this.newItem.name,
+          key: this.newItem.key
+        }
+        console.log('newItem', item)
+        // const file = this.image
+        if (item.name !== '' && item.name && this.newItem.image) {
+          itemArr.push(item)
+            .then(data => {
+              key = data.key
+              return key
+            })
+            .then(key => {
+              const fileName = this.newItem.fileName
+              const ext = fileName.slice(fileName.lastIndexOf('.'))
+              return firebase.storage().ref('items/' + key + '.' + ext).put(this.newItem.image)
+            })
+            .then(snapshot => {
+              snapshot.ref.getDownloadURL().then(function (downloadURL) {
+                return firebase.database().ref('items').child(key).update({imageUrl: downloadURL})
+              })
+            })
+            .catch(error => {
+              console.log(error)
+              return error
+            })
+          this.flash('Import Sucess', this.successType, {
+            timeout: 3000,
+            important: false
+          })
+
+        } else {
+          console.log('NoImage')
+          this.flash('Please input again', this.errorType, {
+            timeout: 3000,
+            important: false
+          })
+          productImage = null
+          itemName = null
+        }
+      },
+      onDrop: function (e) {
+        e.stopPropagation()
+        e.preventDefault()
+        var files = e.dataTransfer.files
+        this.createFile(files[0])
+      },
+      async onChange(e) {
+        var files = e.target.files
+        this.newItem.image = files[0]
+        this.createFile(files[0])
+      },
+      createFile(file) {
+        if (!file.type.match('image.*')) {
+          alert('Select an image')
+          return
+        }
+        // var img = new Image()
+        var reader = new FileReader()
+        reader.onload = (e) => {
+          this.image = e.target.result
+          this.imageUrl = reader.result
+        }
+        reader.readAsDataURL(file)
+      },
+      removeFile() {
+        this.image = ''
       }
-    },
-    onDrop: function (e) {
-      e.stopPropagation()
-      e.preventDefault()
-      var files = e.dataTransfer.files
-      this.createFile(files[0])
-    },
-    async onChange (e) {
-      var files = e.target.files
-      this.newItem.image = files[0]
-      this.createFile(files[0])
-    },
-    createFile (file) {
-      if (!file.type.match('image.*')) {
-        alert('Select an image')
-        return
-      }
-      // var img = new Image()
-      var reader = new FileReader()
-      reader.onload = (e) => {
-        this.image = e.target.result
-        this.imageUrl = reader.result
-      }
-      reader.readAsDataURL(file)
-    },
-    removeFile () {
-      this.image = ''
     }
   }
-}
 </script>
 
 <style scoped type="scss">
   @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+
+  #tableProduct td, #tableProduct th {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+
+  #tableProduct {
+    margin-top: 20px;
+  }
+
+  #tableProduct tr:nth-child(even){background-color: #f2f2f2;}
+
+  #tableProduct tr:hover {background-color: #ddd;}
+
+  #tableProduct th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+  }
+
+  #paginationNav .pagination .page-item a {
+    font-size: .85rem !important;
+  }
+
+  .vt-sort:before{
+    font-family: FontAwesome;
+    padding-right: 0.5em;
+    width: 1.28571429em;
+    display: inline-block;
+    text-align: center;
+  }
+
+  .vt-sortable:before{
+    content: "\f0dc";
+  }
+
+  .vt-asc:before{
+    content: "\f160";
+  }
+
+  .vt-desc:before{
+    content: "\f161";
+  }
+
+
+  .flex-content {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .flex-item {
+    padding: 5px;
+    width: 50%;
+    height: 40px;
+    font-weight: bold;
+  }
 
   .flashpool {
     -webkit-box-sizing: border-box;
@@ -240,6 +325,7 @@ export default {
     font-size: 13px;
     line-height: 130%;
   }
+
   body {
     font-family: 'Poppins', sans-serif;
     background: #fafafa;
@@ -418,10 +504,6 @@ export default {
     }
   }
 
-  table {
-    margin-left: 20px;
-  }
-
   *,
   *:after,
   *:before {
@@ -488,7 +570,6 @@ export default {
     height: auto;
     max-height: 80%;
     max-width: 80%;
-    width: auto;
   }
 
   .drop {
@@ -496,23 +577,22 @@ export default {
     border: 4px dashed #ccc;
     background-color: #f6f6f6;
     border-radius: 2px;
-    height: 100%;
-    max-height: 400px;
-    max-width: 600px;
-    width: 100%;
+    height: 80%;
+    width: 80%;
   }
 
   .btnCenter {
     display: flex;
     justify-content: space-between;
   }
+
   @import url('https://fonts.googleapis.com/css?family=Raleway:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i');
 
-  html, body{
-    height:100%;
-    width:100%;
+  html, body {
+    height: 100%;
+    width: 100%;
     font-family: 'Raleway', sans-serif;
-    background-color:#efefef;
+    background-color: #efefef;
     display: table;
     text-align: center;
 

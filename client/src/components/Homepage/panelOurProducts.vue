@@ -5,7 +5,7 @@
       <div class="slideShowProduct">
         <div class="carousel-wrap pb-2">
           <div class="owl-carousel owl-theme owl-product">
-            <div v-for="item in itemList1" class="item text-center" v-bind:key="item['.key']">
+            <div v-for="item in items" class="item text-center" v-bind:key="item['.key']">
               <img class="position-relative" :src="item.imageUrl" alt="">
               <h3 class="position-absolute text-white h3CenterDiv">{{item.name}}</h3>
             </div>
@@ -13,7 +13,7 @@
         </div>
         <div class="carousel-wrap pb-5 d-md-block d-none">
           <div class="owl-carousel owl-theme owl-product">
-            <div v-for="item in itemList2" class="item text-center" v-bind:key="item['.key']">
+            <div v-for="item in items" class="item text-center" v-bind:key="item['.key']">
               <img class="position-relative" :src="item.imageUrl" alt="">
               <h3 class="position-absolute text-white h3CenterDiv">{{item.name}}</h3>
             </div>
@@ -40,19 +40,13 @@ export default {
     items: itemArr
   },
   data () {
-    if (this.items < 6) {
-      return {
-        itemList1: this.items
-      }
-    } else {
-      return {
-        itemList1: this.items.slice(0, this.items / 2),
-        itemList2: this.items.slice(this.items / 2 + 1)
-      }
+    return {
+      items: [],
+      array1: this.getData()
     }
   },
   mounted () {
-    console.log(itemArr)
+    console.log(this.items)
     $('.owl-product').owlCarousel({
       margin: 50,
       navText: ['<div class=\'nav-btn prev-slide\'></div>', '<div class=\'nav-btn next-slide\'></div>'],
@@ -73,6 +67,20 @@ export default {
         }
       }
     })
+  },
+  methods: {
+    getData() {
+      let key = 0;
+      let array = []
+      this.items.forEach((item) => {
+        array.push({
+          name: item.name,
+          key: item.key,
+          imageUrl: item.imageUrl
+        })
+      })
+      console(array)
+    }
   }
 }
 </script>
