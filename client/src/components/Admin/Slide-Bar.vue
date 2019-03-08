@@ -73,7 +73,7 @@
           :pageSize="5"
           @totalPagesChanged="totalPages = $event" id="tableProduct">
           <thead slot="head">
-          <th>Key</th>
+          <th>Code</th>
           <v-th sortKey="name" defaultSort="desc">Name</v-th>
           <th>Image</th>
           </thead>
@@ -102,7 +102,7 @@
           <div class="drop display-inline align-center" @dragover.prevent @drop="onDrop">
             <div class="helper"></div>
             <label v-if="!image" class="btn display-inline">
-              SELECT OR DROP AN IMAGE
+              SELECT IMAGE
               <input type="file" name="image" @change="onChange" accept="image/*">
             </label>
             <div class="hidden display-inline align-center" v-else v-bind:class="{ 'image': true }">
@@ -123,13 +123,9 @@
 <script>
   import {firebase} from '@/services/firebaseConfig'
 
-  let itemArr = firebase.database().ref('items')
-  let listItemProduct
+  let firebaseStr = firebase.firestore()
   export default {
     name: 'Slide-Bar',
-    firebase: {
-      listItemProduct: itemArr
-    },
     data() {
       return {
         currentPage: 1,
@@ -144,12 +140,12 @@
           image: null,
           fileName: ''
         },
+        listItemProduct: this.getDataProduct(),
         image: '',
         errorType: 'error',
         warningType: 'warning',
         infoType: 'info',
-        successType: 'success',
-        listItemProduct: ''
+        successType: 'success'
       }
     },
     mounted() {
@@ -161,29 +157,43 @@
       })
     },
     methods: {
+      getDataProduct() {
+        let arr = []
+        firebase.firestore().collection('items').get().then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            let data = {
+              'id': doc.id,
+              'key': doc.data().key,
+              'name': doc.data().name,
+              'imageUrl': doc.data().imageUrl,
+            }
+            console.log(data)
+            arr.push(data)
+          })
+        })
+        return arr
+      },
       addItem() {
         let key
         this.newItem.key = Math.random().toString(36).substring(7)
         const item = {
           name: this.newItem.name,
-          key: this.newItem.key
+          key: this.newItem.key,
+          imageUrl: 'null'
         }
-        console.log('newItem', item)
         // const file = this.image
         if (item.name !== '' && item.name && this.newItem.image) {
-          itemArr.push(item)
-            .then(data => {
-              key = data.key
-              return key
-            })
-            .then(key => {
-              const fileName = this.newItem.fileName
+          firebaseStr.collection('items').add(item)
+            .then(docRef => {
+              key = docRef.id
+              const fileName = this.newItem.image.name
               const ext = fileName.slice(fileName.lastIndexOf('.'))
-              return firebase.storage().ref('items/' + key + '.' + ext).put(this.newItem.image)
+              return firebase.storage().ref().child('items/' + key + '.' + ext).put(this.newItem.image)
             })
             .then(snapshot => {
               snapshot.ref.getDownloadURL().then(function (downloadURL) {
-                return firebase.database().ref('items').child(key).update({imageUrl: downloadURL})
+                console.log('downloadURL',downloadURL)
+                return firebaseStr.collection('items').doc(key).update({imageUrl: downloadURL})
               })
             })
             .catch(error => {
@@ -201,8 +211,6 @@
             timeout: 3000,
             important: false
           })
-          productImage = null
-          itemName = null
         }
       },
       onDrop: function (e) {

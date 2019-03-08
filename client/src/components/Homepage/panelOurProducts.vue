@@ -4,8 +4,8 @@
     <div class="container p-md-0 pb-3">
       <div class="slideShowProduct">
         <div class="carousel-wrap pb-2">
-          <div class="owl-carousel owl-theme owl-product">
-            <div v-for="item in items" class="item text-center" v-bind:key="item['.key']">
+          <div class="owl-carousel owl-theme owl-product loader-section" v-if="loading">
+            <div v-for="item in listItemProduct" class="item text-center" v-bind:key="item['.key']">
               <img class="position-relative" :src="item.imageUrl" alt="">
               <h3 class="position-absolute text-white h3CenterDiv">{{item.name}}</h3>
             </div>
@@ -13,7 +13,7 @@
         </div>
         <div class="carousel-wrap pb-5 d-md-block d-none">
           <div class="owl-carousel owl-theme owl-product">
-            <div v-for="item in items" class="item text-center" v-bind:key="item['.key']">
+            <div v-for="item in listItemProduct" class="item text-center" v-bind:key="item['.key']">
               <img class="position-relative" :src="item.imageUrl" alt="">
               <h3 class="position-absolute text-white h3CenterDiv">{{item.name}}</h3>
             </div>
@@ -31,55 +31,65 @@ import 'owl.carousel/dist/assets/owl.theme.default.min.css'
 import 'owl.carousel'
 import { firebase } from '@/services/firebaseConfig'
 
-let itemArr = firebase.database().ref('items')
-
 export default {
   name: 'panelOurProducts',
   components: { HeaderComponent },
-  firebase: {
-    items: itemArr
+  watch: {
+    listItemProduct() {
+      this.createCaroulse()
+    }
   },
   data () {
     return {
-      items: [],
-      array1: this.getData()
+      listItemProduct: this.createData(),
+      loading: true
     }
   },
   mounted () {
-    console.log(this.items)
-    $('.owl-product').owlCarousel({
-      margin: 50,
-      navText: ['<div class=\'nav-btn prev-slide\'></div>', '<div class=\'nav-btn next-slide\'></div>'],
-      autoplay: true,
-      autoplayTimeout: 2000,
-      lazyLoad: true,
-      autoPlay: 2500,
-      multipleRow: true,
-      rows: 2,
-      lazyLoadEager: 500,
-      smartSpeed: 1000,
-      responsive: {
-        0: {
-          items: 1
-        },
-        768: {
-          items: 3
-        }
-      }
-    })
+
+  },
+  created() {
   },
   methods: {
-    getData() {
-      let key = 0;
+    async createData () {
       let array = []
-      this.items.forEach((item) => {
-        array.push({
-          name: item.name,
-          key: item.key,
-          imageUrl: item.imageUrl
+      await firebase.firestore().collection('items').get().then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          let data = {
+            'id': doc.id,
+            'key': doc.data().key,
+            'name': doc.data().name,
+            'imageUrl': doc.data().imageUrl,
+          }
+          array.push(data)
         })
       })
-      console(array)
+      console.log(array)
+      this.loading = false
+      this.createCaroulse()
+      return array
+    },
+    createCaroulse () {
+      $('.owl-product').owlCarousel({
+        margin: 50,
+        navText: ['<div class=\'nav-btn prev-slide\'></div>', '<div class=\'nav-btn next-slide\'></div>'],
+        autoplay: true,
+        autoplayTimeout: 2000,
+        lazyLoad: true,
+        autoPlay: 2500,
+        multipleRow: true,
+        rows: 2,
+        lazyLoadEager: 500,
+        smartSpeed: 1000,
+        responsive: {
+          0: {
+            items: 1
+          },
+          768: {
+            items: 3
+          }
+        }
+      })
     }
   }
 }
