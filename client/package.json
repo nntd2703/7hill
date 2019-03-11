@@ -16,6 +16,7 @@
     "owl.carousel": "^2.3.4",
     "popper.js": "^1.14.7",
     "vue": "^2.6.8",
+    "vue-carousel": "^0.18.0-alpha",
     "vue-flash-message": "^0.7.2",
     "vue-router": "^3.0.2",
     "vuefire": "^1.4.5",

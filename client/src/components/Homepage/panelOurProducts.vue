@@ -3,21 +3,21 @@
     <header-component headerLabel="Out Products" class="colorSF pt-md-3"/>
     <div class="container p-md-0 pb-3">
       <div class="slideShowProduct">
-        <div class="carousel-wrap pb-2">
-          <div class="owl-carousel owl-theme owl-product loader-section">
-            <div v-for="item in listItemProduct" class="item text-center" v-bind:key="item['.key']">
+        <div class="carousel-wrap pb-5 d-md-block d-none">
+          <carousel :autoplay="true" :autoplayTimeout="2500" :perPage="3" :navigationEnabled="true" :paginationEnabled="false" :navigationPrevLabel="null" :navigationNextLabel="null">
+            <slide class="item text-center" v-for="item in listItem1" v-bind:key="item['.key']">
               <img class="position-relative" :src="item.imageUrl" alt="">
               <h3 class="position-absolute text-white h3CenterDiv">{{item.name}}</h3>
-            </div>
-          </div>
+            </slide>
+          </carousel>
         </div>
         <div class="carousel-wrap pb-5 d-md-block d-none">
-          <div class="owl-carousel owl-theme owl-product">
-            <div v-for="item in listItemProduct" class="item text-center" v-bind:key="item['.key']">
+          <carousel :autoplay="true" :autoplayTimeout="2000" :perPage="3" :navigationEnabled="true" :paginationEnabled="false" :navigationPrevLabel="null" :navigationNextLabel="null">
+            <slide class="item text-center" v-for="item in listItem2" v-bind:key="item['.key']">
               <img class="position-relative" :src="item.imageUrl" alt="">
               <h3 class="position-absolute text-white h3CenterDiv">{{item.name}}</h3>
-            </div>
-          </div>
+            </slide>
+          </carousel>
         </div>
       </div>
     </div>
@@ -25,71 +25,57 @@
 </template>
 
 <script>
-import HeaderComponent from './headerComponent'
-import 'owl.carousel/dist/assets/owl.carousel.css'
-import 'owl.carousel/dist/assets/owl.theme.default.min.css'
-import 'owl.carousel'
-import { firebase } from '@/services/firebaseConfig'
+  import HeaderComponent from './headerComponent'
+  import 'owl.carousel/dist/assets/owl.carousel.css'
+  import 'owl.carousel/dist/assets/owl.theme.default.min.css'
+  import 'owl.carousel'
+  import {firebase} from '@/services/firebaseConfig'
 
-export default {
-  name: 'panelOurProducts',
-  components: {HeaderComponent},
-  watch: {
-    listItemProduct() {
-      console.log('listItemProduct changing')
-      this.createCaroulse()
-    }
-  },
-  data() {
-    return {
-      listItemProduct: this.createData()
-    }
-  },
-  mounted() {
-  },
-  created() {
-  },
-  methods: {
-    async createData() {
-      let array = []
-      await firebase.firestore().collection('items').get().then((querySnapshot) => {
+  export default {
+    name: 'panelOurProducts',
+    components: {HeaderComponent},
+    watch: {
+      listItemProduct() {
+        let count = this.listItemProduct.length
+        let key = 0
+        this.listItemProduct.forEach((item) => {
+          if (key <= count/2 || count <= 3) {
+            this.listItem1.push(item)
+            key++
+          } else {
+            this.listItem2.push(item)
+            key++
+          }
+        })
+      }
+    },
+    data() {
+      return {
+        listItemProduct: [],
+        listItem1: [],
+        listItem2: [],
+        errors: [],
+        ref: firebase.firestore().collection('items'),
+      }
+    },
+    mounted() {
+
+    },
+    created() {
+      this.ref.onSnapshot((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-          let data = {
+          this.listItemProduct.push({
             'id': doc.id,
             'key': doc.data().key,
             'name': doc.data().name,
             'imageUrl': doc.data().imageUrl
-          }
-          array.push(data)
+          })
         })
-        this.createTheCarousel()
-        return array
       })
     },
-    createTheCarousel () {
-      $('.owl-product').owlCarousel({
-        margin: 50,
-        navText: ['<div class=\'nav-btn prev-slide\'></div>', '<div class=\'nav-btn next-slide\'></div>'],
-        autoplay: true,
-        autoplayTimeout: 2000,
-        lazyLoad: true,
-        autoPlay: 2500,
-        multipleRow: true,
-        rows: 2,
-        lazyLoadEager: 500,
-        smartSpeed: 1000,
-        responsive: {
-          0: {
-            items: 1
-          },
-          768: {
-            items: 3
-          }
-        }
-      })
+    methods: {
     }
   }
-}
 </script>
 
 <style scoped lang="scss">
@@ -112,8 +98,8 @@ export default {
       }
     }
     .owl-carousel .owl-stage {
-       display: flex;
-     }
+      display: flex;
+    }
     .owl-carousel .owl-item img {
       max-width: 380px;
       max-height: 223px !important;
