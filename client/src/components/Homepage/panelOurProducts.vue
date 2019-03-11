@@ -4,7 +4,7 @@
     <div class="container p-md-0 pb-3">
       <div class="slideShowProduct">
         <div class="carousel-wrap pb-2">
-          <div class="owl-carousel owl-theme owl-product loader-section" v-if="loading">
+          <div class="owl-carousel owl-theme owl-product loader-section">
             <div v-for="item in listItemProduct" class="item text-center" v-bind:key="item['.key']">
               <img class="position-relative" :src="item.imageUrl" alt="">
               <h3 class="position-absolute text-white h3CenterDiv">{{item.name}}</h3>
@@ -33,25 +33,24 @@ import { firebase } from '@/services/firebaseConfig'
 
 export default {
   name: 'panelOurProducts',
-  components: { HeaderComponent },
+  components: {HeaderComponent},
   watch: {
     listItemProduct() {
+      console.log('listItemProduct changing')
       this.createCaroulse()
     }
   },
-  data () {
+  data() {
     return {
-      listItemProduct: this.createData(),
-      loading: true
+      listItemProduct: this.createData()
     }
   },
-  mounted () {
-
+  mounted() {
   },
   created() {
   },
   methods: {
-    async createData () {
+    async createData() {
       let array = []
       await firebase.firestore().collection('items').get().then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
@@ -59,17 +58,15 @@ export default {
             'id': doc.id,
             'key': doc.data().key,
             'name': doc.data().name,
-            'imageUrl': doc.data().imageUrl,
+            'imageUrl': doc.data().imageUrl
           }
           array.push(data)
         })
+        this.createTheCarousel()
+        return array
       })
-      console.log(array)
-      this.loading = false
-      this.createCaroulse()
-      return array
     },
-    createCaroulse () {
+    createTheCarousel () {
       $('.owl-product').owlCarousel({
         margin: 50,
         navText: ['<div class=\'nav-btn prev-slide\'></div>', '<div class=\'nav-btn next-slide\'></div>'],
