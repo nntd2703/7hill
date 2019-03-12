@@ -1,19 +1,20 @@
 <template>
   <div class="panelExpertise paral">
+
     <header-component headerLabel="Out Products" class="colorSF pt-md-3"/>
     <div class="container p-md-0 pb-3">
       <div class="slideShowProduct">
         <div class="carousel-wrap pb-5 d-md-block d-none">
-          <carousel :autoplay="true" :autoplayTimeout="2500" :perPage="3" :navigationEnabled="true" :paginationEnabled="false" :navigationPrevLabel="null" :navigationNextLabel="null">
-            <slide class="item text-center" v-for="item in listItem1" v-bind:key="item['.key']">
+          <carousel  :loop="true" :autoplay="true" :autoplayTimeout="8000" :perPageCustom="[[480, 2], [768, 3]]"  :perPage="1" :navigationEnabled="true" :paginationEnabled="false" :navigationPrevLabel="null" :navigationNextLabel="null" :speed="2000" class="d-flex justify-content-around" >
+            <slide class="item" v-for="item in listItem1" v-bind:key="item['.key']">
               <img class="position-relative" :src="item.imageUrl" alt="">
               <h3 class="position-absolute text-white h3CenterDiv">{{item.name}}</h3>
             </slide>
           </carousel>
         </div>
         <div class="carousel-wrap pb-5 d-md-block d-none">
-          <carousel :autoplay="true" :autoplayTimeout="2000" :perPage="3" :navigationEnabled="true" :paginationEnabled="false" :navigationPrevLabel="null" :navigationNextLabel="null">
-            <slide class="item text-center" v-for="item in listItem2" v-bind:key="item['.key']">
+          <carousel  :loop="true" :autoplay="true" :autoplayTimeout="8000" :perPageCustom="[[480, 2], [768, 3]]" :perPage="1" :navigationEnabled="true" :paginationEnabled="false" :navigationPrevLabel="null" :navigationNextLabel="null" :speed="2000" class="d-flex justify-content-around">
+            <slide class="item" v-for="item in listItem2" v-bind:key="item['.key']">
               <img class="position-relative" :src="item.imageUrl" alt="">
               <h3 class="position-absolute text-white h3CenterDiv">{{item.name}}</h3>
             </slide>
@@ -33,7 +34,7 @@
 
   export default {
     name: 'panelOurProducts',
-    components: {HeaderComponent},
+    components: { HeaderComponent },
     watch: {
       listItemProduct() {
         let count = this.listItemProduct.length
@@ -81,12 +82,15 @@
 <style scoped lang="scss">
   .panelExpertise {
     background-image: url("../../assets/backgroundProduct.jpg");
-
+    .item img{
+      width: 90%;
+      max-width: 380px;
+      max-height: 223px !important;
+    }
     .h3CenterDiv {
-      right: 16%;
-      width: 65%;
-      top: 35%;
       font-size: 1.4rem;
+      top: 46%;
+      padding-left: 113px;
       @media (max-width: 1200px) {
         font-size: 1.2rem;
       }
@@ -96,13 +100,6 @@
       @media (max-width: 768px) {
         font-size: 2rem;
       }
-    }
-    .owl-carousel .owl-stage {
-      display: flex;
-    }
-    .owl-carousel .owl-item img {
-      max-width: 380px;
-      max-height: 223px !important;
     }
   }
 </style>

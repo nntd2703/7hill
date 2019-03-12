@@ -5,7 +5,9 @@ import VueFire from 'vuefire'
 import VueFlashMessage from 'vue-flash-message'
 import SmartTable from 'vuejs-smart-table'
 import VueCarousel from 'vue-carousel'
+import VueSpinners from '@saeris/vue-spinners'
 
+Vue.use(VueSpinners)
 Vue.use(VueCarousel)
 Vue.use(SmartTable)
 Vue.use(VueFlashMessage)
