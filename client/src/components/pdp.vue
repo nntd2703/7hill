@@ -85,6 +85,7 @@ import NavTop from './Homepage/navTop'
 import NavigationBar from './Homepage/navigationBar'
 import PanelCategories from './Homepage/panelCategories'
 import PanelFooter from './Homepage/panelFooter'
+
 export default {
   name: 'pdp',
   components: { PanelFooter, PanelCategories, NavigationBar, NavTop, PanelAbout },
@@ -105,6 +106,7 @@ export default {
   },
   created () {
     this.$emit(`update:layout`, HomeIndex)
+    console.log(this.$route.params.productID)
   }
 }
 </script>

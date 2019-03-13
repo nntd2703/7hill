@@ -18,6 +18,7 @@ export default {
 
 <style lang="scss">
   @import url(https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900);
+  @import url(https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.3.5/tiny-slider.css);
 
   .paral {
     background-attachment: fixed;
@@ -34,6 +35,13 @@ export default {
     letter-spacing: normal;
     color: #444444;
     text-transform: uppercase;
+  }
+  .loading {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
   }
 
   html {

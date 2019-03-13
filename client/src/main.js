@@ -6,6 +6,7 @@ import VueFlashMessage from 'vue-flash-message'
 import SmartTable from 'vuejs-smart-table'
 import VueCarousel from 'vue-carousel'
 
+
 Vue.use(VueCarousel)
 Vue.use(SmartTable)
 Vue.use(VueFlashMessage)
