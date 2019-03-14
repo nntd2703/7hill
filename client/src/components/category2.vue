@@ -2,7 +2,7 @@
   <div class="content">
   <div class="loading w-100 h-100" v-if="loading">
     <div class="item">
-      <cube-shadow></cube-shadow>
+      <cube-shadow size="120px"></cube-shadow>
     </div>
   </div>
   <div class="categoryPanel" v-else>
@@ -14,7 +14,7 @@
       <div class="container">
         <div class="row">
           <div class="col-12 col-md-3 productDetails pb-5" v-for="item in listItemProduct">
-            <router-link :to="{ name: 'PDP', params: { productID: item.key } }"><a>
+            <router-link :to="{ name: 'PDP', params: { productID: item.id } }"><a>
               <img :src="item.imageUrl"/>
               <p class="pt-2 productName">{{item.name}}</p>
             </a></router-link>

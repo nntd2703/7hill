@@ -2,7 +2,7 @@
   <div id="HomePage">
     <div class="loading w-100 h-100" v-if="loading">
       <div class="item">
-        <cube-shadow></cube-shadow>
+        <cube-shadow size="120px"></cube-shadow>
       </div>
     </div>
     <div v-else>
@@ -32,19 +32,19 @@ import NavTop from './Homepage/navTop'
 import NavigationBar from './Homepage/navigationBar'
 import PanelCategories from './Homepage/panelCategories'
 import PanelFooter from './Homepage/panelFooter'
-import CubeShadow from "vue-loading-spinner/src/components/Circle9";
-import {firebase} from '@/services/firebaseConfig'
+import CubeShadow from 'vue-loading-spinner/src/components/Circle9'
+import { firebase } from '@/services/firebaseConfig'
 
 export default {
   name: 'app',
-  components: {CubeShadow, PanelFooter, PanelCategories, NavigationBar, NavTop, FounderPanel, PanelContentAbout, PanelContact, PanelOurProducts, PanelOurService, SlideShow },
+  components: { CubeShadow, PanelFooter, PanelCategories, NavigationBar, NavTop, FounderPanel, PanelContentAbout, PanelContact, PanelOurProducts, PanelOurService, SlideShow },
   watch: {
-    listItemProduct() {
+    listItemProduct () {
       this.loading = true
       let count = this.listItemProduct.length
       let key = 0
       this.listItemProduct.forEach((item) => {
-        if (key <= count/2 || count <= 3) {
+        if (key <= count / 2 || count <= 3) {
           this.listItem1.push(item)
           key++
         } else {
@@ -53,13 +53,13 @@ export default {
         }
       })
       setTimeout(() => {
-        if(this.isLoadingDataDone) {
+        if (this.isLoadingDataDone) {
           this.loading = false
         }
       }, 1700)
     },
     isLoadingDataDone () {
-      if(this.isLoadingDataDone) {
+      if (this.isLoadingDataDone) {
         this.loading = false
       }
     }

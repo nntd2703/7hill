@@ -12,7 +12,7 @@
           </carousel>
         </div>
         <div class="carousel-wrap pb-5 d-md-block d-none">
-          <carousel :loop="true" :autoplay="true" :autoplayTimeout="8000" :per-page-custom="[[768, 3]]" :navigationEnabled="true" :paginationEnabled="false" :navigationPrevLabel="null" :navigationNextLabel="null" :speed="2000" class="d-flex justify-content-around col-12">
+          <carousel :loop="true" :autoplay="true" :autoplayTimeout="8000" :per-page-custom="[[768, 3]]" :navigationEnabled="true" :paginationEnabled="false" :navigationPrevLabel="null" :navigationNextLabel="null" :speed="2000" class="d-flex justify-content-around">
             <slide class="item" v-for="item in listItem2" v-bind:key="item['.key']">
               <img class="position-relative" :src="item.imageUrl" alt="">
               <h3 class="position-absolute text-white h3CenterDiv">{{item.name}}</h3>

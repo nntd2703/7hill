@@ -1,5 +1,12 @@
 <template>
-  <div class="contentPDP">
+  <div id="pdpContent">
+  <div id="content" v-if="productID">
+  <div class="loading w-100 h-100" v-if="isLoading">
+    <div class="item">
+      <cube-shadow size="120px"></cube-shadow>
+    </div>
+  </div>
+  <div class="contentPDP" v-else>
     <nav-top></nav-top>
     <navigation-bar></navigation-bar>
     <panel-about/>
@@ -7,8 +14,8 @@
       <div class="row d-flex">
         <div
           class="imagePDP col-12 col-md-6 justify-content-center align-content-center pt-3 pt-md-5 pb-3 pb-md-5 h-auto position-relative">
-          <h2 class="titleImage text-center text-uppercase">black peper</h2>
-          <img src="../assets/ProductImage/blackpeper.jpg" class="p-2 imgPDP" id="imgPDP"/>
+          <h2 class="titleImage text-center text-uppercase">{{productDetails.name}}</h2>
+          <img :src="productDetails.imageUrl" class="p-2 imgPDP" id="imgPDP"/>
         </div>
         <div class="col-12 col-md-6 pt-5">
           <h2 class="titleTable text-center text-uppercase">SPECIFICATIONS</h2>
@@ -76,6 +83,16 @@
     <panel-categories/>
     <panel-footer></panel-footer>
   </div>
+  </div>
+  <div v-else>
+    <nav-top></nav-top>
+    <navigation-bar></navigation-bar>
+    <panel-about/>
+    <error-page></error-page>
+    <panel-categories/>
+    <panel-footer></panel-footer>
+  </div>
+  </div>
 </template>
 
 <script>
@@ -85,28 +102,46 @@ import NavTop from './Homepage/navTop'
 import NavigationBar from './Homepage/navigationBar'
 import PanelCategories from './Homepage/panelCategories'
 import PanelFooter from './Homepage/panelFooter'
+import { firebase } from '@/services/firebaseConfig'
+import CubeShadow from "vue-loading-spinner/src/components/Circle9";
+import ErrorPage from "./errorPage";
 
 export default {
   name: 'pdp',
-  components: { PanelFooter, PanelCategories, NavigationBar, NavTop, PanelAbout },
+  components: {ErrorPage, CubeShadow, PanelFooter, PanelCategories, NavigationBar, NavTop, PanelAbout },
   mounted () {
   },
+  watch: {
+    isLoading() {
+      console.log('isloadingChange', this.isLoading)
+    }
+  },
+  data () {
+    return {
+      ref: firebase.firestore().collection('items'),
+      productDetails: {},
+      isLoading: true,
+      productID: this.$route.params.productID
+    }
+  },
   updated () {
-    this.resizeHeight(function () {
-      var divTable = $('.tableDetailsProduct').height()
-      if ($(window).width() > 767) {
-        var divHeight = $('.imgPDP').height()
-        if (divHeight !== divTable) {
-          $('.tableDetailsProduct').css('height', (divHeight) + 'px')
-        }
-      } else {
-        $('.tableDetailsProduct').css('height', (450) + 'px')
-      }
-    })
+
   },
   created () {
+    this.isLoading = true
     this.$emit(`update:layout`, HomeIndex)
-    console.log(this.$route.params.productID)
+    if(this.$route.params.productID) {
+      this.ref.doc(this.$route.params.productID).get().then( doc=> {
+        if (!doc.exists) {
+          console.log('No such document!');
+        } else {
+          this.productDetails = doc.data()
+        }
+      })
+    }
+    setTimeout(() => {
+      this.isLoading  = false
+    }, 1500)
   }
 }
 </script>
@@ -127,6 +162,11 @@ export default {
     height: 450px;
     box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.2);
     overflow: auto;
+  }
+
+  .imgPDP {
+    display: block;
+    margin: auto;
   }
 
   .col {
