@@ -15,12 +15,16 @@
         <div
           class="imagePDP col-12 col-md-6 justify-content-center align-content-center pt-3 pt-md-5 pb-3 pb-md-5 h-auto position-relative">
           <h2 class="titleImage text-center text-uppercase">{{productDetails.name}}</h2>
-          <img :src="productDetails.imageUrl" class="p-2 imgPDP" id="imgPDP"/>
+          <vue-load-image class="imageProduct">
+            <img slot="image" :src="productDetails.imageUrl" class="p-2 imgPDP" id="imgPDP"/>
+            <img slot="preloader" src="../assets/image-loader.gif"/>
+            <div slot="error">error message</div>
+          </vue-load-image>
         </div>
         <div class="col-12 col-md-6 pt-5">
           <h2 class="titleTable text-center text-uppercase">SPECIFICATIONS</h2>
           <div class="tableDetails pt-2 pb-5">
-            <div class="tableDetailsProduct  pr-5 pl-5">
+            <div class="tableDetailsProduct pr-5 pl-5">
               <table class="table table-hover">
                 <tbody>
                 <tr class="first row">
@@ -85,12 +89,7 @@
   </div>
   </div>
   <div v-else>
-    <nav-top></nav-top>
-    <navigation-bar></navigation-bar>
-    <panel-about/>
     <error-page></error-page>
-    <panel-categories/>
-    <panel-footer></panel-footer>
   </div>
   </div>
 </template>
@@ -103,16 +102,17 @@ import NavigationBar from './Homepage/navigationBar'
 import PanelCategories from './Homepage/panelCategories'
 import PanelFooter from './Homepage/panelFooter'
 import { firebase } from '@/services/firebaseConfig'
-import CubeShadow from "vue-loading-spinner/src/components/Circle9";
-import ErrorPage from "./errorPage";
+import CubeShadow from 'vue-loading-spinner/src/components/Circle9'
+import ErrorPage from './errorPage'
+import VueLoadImage from 'vue-load-image'
 
 export default {
   name: 'pdp',
-  components: {ErrorPage, CubeShadow, PanelFooter, PanelCategories, NavigationBar, NavTop, PanelAbout },
+  components: { ErrorPage, CubeShadow, PanelFooter, PanelCategories, NavigationBar, NavTop, PanelAbout, 'vue-load-image': VueLoadImage },
   mounted () {
   },
   watch: {
-    isLoading() {
+    isLoading () {
       console.log('isloadingChange', this.isLoading)
     }
   },
@@ -130,17 +130,17 @@ export default {
   created () {
     this.isLoading = true
     this.$emit(`update:layout`, HomeIndex)
-    if(this.$route.params.productID) {
-      this.ref.doc(this.$route.params.productID).get().then( doc=> {
+    if (this.$route.params.productID) {
+      this.ref.doc(this.$route.params.productID).get().then(doc => {
         if (!doc.exists) {
-          console.log('No such document!');
+          console.log('No such document!')
         } else {
           this.productDetails = doc.data()
         }
       })
     }
     setTimeout(() => {
-      this.isLoading  = false
+      this.isLoading = false
     }, 1500)
   }
 }

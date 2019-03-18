@@ -1,5 +1,11 @@
 <template>
-  <div class="category1">
+  <div>
+    <div class="loading w-100 h-100" v-if="loading">
+      <div class="item">
+        <cube-shadow size="120px"></cube-shadow>
+      </div>
+    </div>
+  <div class="category1" v-else>
     <nav-top></nav-top>
     <navigation-bar></navigation-bar>
     <panel-about/>
@@ -29,6 +35,7 @@
     <panel-categories/>
     <panel-footer></panel-footer>
   </div>
+  </div>
 </template>
 
 <script>
@@ -38,11 +45,21 @@ import NavTop from './Homepage/navTop'
 import NavigationBar from './Homepage/navigationBar'
 import PanelCategories from './Homepage/panelCategories'
 import PanelFooter from './Homepage/panelFooter'
+import CubeShadow from 'vue-loading-spinner/src/components/Circle9'
+
 export default {
   name: 'category1',
-  components: { PanelFooter, PanelCategories, NavigationBar, NavTop, PanelAbout },
+  components: { CubeShadow, PanelFooter, PanelCategories, NavigationBar, NavTop, PanelAbout },
+  data () {
+    return {
+      loading: true
+    }
+  },
   created () {
     this.$emit(`update:layout`, HomeIndex)
+    setTimeout(() => {
+      this.loading = false
+    }, 1300)
   }
 }
 </script>

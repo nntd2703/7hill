@@ -13,9 +13,13 @@
     <div class="categoryDescription">
       <div class="container">
         <div class="row">
-          <div class="col-12 col-md-3 productDetails pb-5" v-for="item in listItemProduct">
+          <div class="col-12 col-md-3 productDetails pb-5" v-bind:key="item['.key']" v-for="item in listItemProduct">
             <router-link :to="{ name: 'PDP', params: { productID: item.id } }"><a>
-              <img :src="item.imageUrl"/>
+              <vue-load-image>
+                <img slot="image"  :src="item.imageUrl"/>
+                <img slot="preloader" src="../assets/image-loader.gif"/>
+                <div slot="error">error message</div>
+              </vue-load-image>
               <p class="pt-2 productName">{{item.name}}</p>
             </a></router-link>
           </div>
@@ -24,9 +28,13 @@
     </div>
     <div class="slideProduct pr-5 pl-5">
       <carousel  :loop="true" :autoplay="true" :autoplayTimeout="4000" :per-page="1" :navigationEnabled="true" :paginationEnabled="false" :navigationPrevLabel="null" :navigationNextLabel="null" :speed="1500"  >
-        <slide class="product"  v-for="item in listItemProduct">
+        <slide class="product"  v-for="item in listItemProduct" v-bind:key="item['.key']">
           <a>
-            <img :src="item.imageUrl"/>
+            <vue-load-image>
+              <img slot="image"  :src="item.imageUrl"/>
+              <img slot="preloader" src="../assets/image-loader.gif"/>
+              <div slot="error">error message</div>
+            </vue-load-image>
             <div class="pt-3 text-center productName">{{item.name}}</div>
           </a>
         </slide>
@@ -45,12 +53,13 @@ import NavTop from './Homepage/navTop'
 import NavigationBar from './Homepage/navigationBar'
 import PanelCategories from './Homepage/panelCategories'
 import PanelFooter from './Homepage/panelFooter'
-import {firebase} from '@/services/firebaseConfig'
-import CubeShadow from "vue-loading-spinner/src/components/Circle9";
+import { firebase } from '@/services/firebaseConfig'
+import CubeShadow from 'vue-loading-spinner/src/components/Circle9'
+import VueLoadImage from 'vue-load-image'
 
 export default {
   name: 'category2',
-  components: {CubeShadow, PanelFooter, PanelCategories, NavigationBar, NavTop, PanelAbout },
+  components: { CubeShadow, PanelFooter, PanelCategories, NavigationBar, NavTop, PanelAbout , 'vue-load-image': VueLoadImage },
   created () {
     this.$emit(`update:layout`, HomeIndex)
     this.ref.onSnapshot((querySnapshot) => {
@@ -65,7 +74,7 @@ export default {
     })
     setTimeout(() => {
       this.loading = false
-    }, 1700)
+    }, 1300)
   },
   data () {
     return {
